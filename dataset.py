@@ -38,5 +38,10 @@ def get_dataset():
 
     df_train.rename(columns=column_renaming, inplace=True)
     df_test.rename(columns=column_renaming, inplace=True)
+    
+    # Drop constant columns
+    df_train = df_train.drop(columns=['way', 'composition'])
+    df_test = df_test.drop(columns=['way', 'composition'])
+
 
     return df_train, df_test
