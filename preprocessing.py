@@ -24,6 +24,11 @@ def preprocessData(df_train, df_test):
 
     def extractHour(X):
         X['hour'] = pd.to_datetime(X['hour'], format='%H:%M:%S').dt.hour
+
+        # Normalize hour max value will be 1 and min value will be 0
+        X['hour'] = (X['hour'] - X['hour'].min()) / \
+            (X['hour'].max() - X['hour'].min())
+
         return X
 
     def removeUnusedColumns(X):
@@ -41,13 +46,8 @@ def preprocessData(df_train, df_test):
     # Normalize
     numeric_features = new_df_train.select_dtypes(include=[np.number]).columns
 
-    # Remove rows with missing values
-    # new_df_train.dropna(inplace=True)
-    # new_df_test.dropna(inplace=True)
-
     numeric_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='constant', fill_value=0)),
-        # ('scaler', StandardScaler())
+        ('imputer', SimpleImputer(strategy='mean')),
     ])
 
     preprocessor = ColumnTransformer(
