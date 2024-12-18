@@ -47,7 +47,7 @@ def preprocessData(df_train, df_test):
     numeric_features = new_df_train.select_dtypes(include=[np.number]).columns
 
     numeric_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='mean')),
+        ('imputer', SimpleImputer(strategy='most_frequent')),
     ])
 
     preprocessor = ColumnTransformer(
