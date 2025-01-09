@@ -8,19 +8,20 @@ from sklearn.preprocessing import StandardScaler
 
 def preprocessData(df_train, df_test):
 
-    def addAvgLagColumns(X):
+    def addAvgLagColumns(from_df, to_df):
         cols = ['t1s0', 't2s0', 't3s0']
-        stations_lag_train = X.groupby('station')[cols].mean()
+        stations_lag_train = from_df.groupby('station')[cols].mean()
         stations_avg_lag_train = stations_lag_train.mean(axis=1)
 
         cols = ['t0s1', 't0s2', 't0s3']
-        stations_lag_station = X.groupby('station')[cols].mean()
+        stations_lag_station = from_df.groupby('station')[cols].mean()
         stations_avg_lag_station = stations_lag_station.mean(axis=1)
 
-        X['station_avg_lag_train'] = X['station'].map(stations_avg_lag_train)
-        X['station_avg_lag_station'] = X['station'].map(
+        to_df['station_avg_lag_train'] = to_df['station'].map(
+            stations_avg_lag_train)
+        to_df['station_avg_lag_station'] = to_df['station'].map(
             stations_avg_lag_station)
-        return X
+        return to_df
 
     def extractHour(X):
         X['hour'] = pd.to_datetime(X['hour'], format='%H:%M:%S').dt.hour
@@ -34,14 +35,15 @@ def preprocessData(df_train, df_test):
     def removeUnusedColumns(X):
         return X.drop(columns=['date', 'train', 'station'])
 
-    new_df_test = addAvgLagColumns(df_test.copy())
-    new_df_train = addAvgLagColumns(df_train.copy())
+    new_df_train = addAvgLagColumns(df_train.copy(), df_train.copy())
+    # Use train data to calculate avg lag
+    new_df_test = addAvgLagColumns(df_train.copy(), df_test.copy())
 
-    new_df_test = extractHour(new_df_test)
     new_df_train = extractHour(new_df_train)
+    new_df_test = extractHour(new_df_test)
 
-    new_df_test = removeUnusedColumns(new_df_test)
     new_df_train = removeUnusedColumns(new_df_train)
+    new_df_test = removeUnusedColumns(new_df_test)
 
     # Normalize
     numeric_features = new_df_train.select_dtypes(include=[np.number]).columns
